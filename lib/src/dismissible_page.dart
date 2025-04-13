@@ -35,6 +35,7 @@ class DismissiblePage extends StatelessWidget {
     this.onDragStart,
     this.onDragEnd,
     this.onDragUpdate,
+    this.onRawDragUpdate,
     this.isFullScreen = true,
     this.disabled = false,
     this.backgroundColor = Colors.black,
@@ -63,6 +64,7 @@ class DismissiblePage extends StatelessWidget {
 
   /// Called when the widget has been dragged. (0.0 - 1.0)
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+  final ValueChanged<double>? onRawDragUpdate;
 
   /// If true widget will ignore device padding
   /// [MediaQuery.of(context).padding]
@@ -153,6 +155,7 @@ class DismissiblePage extends StatelessWidget {
           onDragStart: onDragStart,
           onDragEnd: onDragEnd,
           onDragUpdate: onDragUpdate,
+          onRawDragUpdate: onRawDragUpdate,
           reverseDuration: reverseDuration,
           hitTestBehavior: hitTestBehavior,
           contentPadding: contentPadding,
@@ -178,6 +181,7 @@ class DismissiblePage extends StatelessWidget {
         onDragStart: onDragStart,
         onDragEnd: onDragEnd,
         onDragUpdate: onDragUpdate,
+        onRawDragUpdate: onRawDragUpdate,
         reverseDuration: reverseDuration,
         hitTestBehavior: hitTestBehavior,
         contentPadding: contentPadding,

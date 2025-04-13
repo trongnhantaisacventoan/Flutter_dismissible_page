@@ -9,6 +9,7 @@ class _DismissiblePageScrollBehavior extends ScrollBehavior {
 
 mixin _DismissiblePageMixin {
   late final AnimationController _moveController;
+  final ValueNotifier<double> _rawValue = ValueNotifier(0);
   int _activePointerCount = 0;
 
   // ignore: prefer_final_fields

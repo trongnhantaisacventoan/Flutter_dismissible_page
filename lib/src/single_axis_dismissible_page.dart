@@ -22,6 +22,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.reverseDuration,
     required this.hitTestBehavior,
     required this.contentPadding,
+    required this.onRawDragUpdate,
     Key? key,
   }) : super(key: key);
 
@@ -30,6 +31,7 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final VoidCallback? onDragEnd;
   final VoidCallback onDismissed;
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+  final ValueChanged<double>? onRawDragUpdate;
   final bool isFullScreen;
   final double minScale;
   final double minRadius;
@@ -62,10 +64,19 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
       duration: Duration.zero,
       vsync: this,
     );
+    _rawValue.addListener(_onUpdateRaw);
     _moveController
       ..addStatusListener(_handleDismissStatusChanged)
       ..addListener(_moveAnimationListener);
     _updateMoveAnimation();
+  }
+
+  void _onUpdateRaw() {
+    if (widget.onRawDragUpdate != null) {
+      widget.onRawDragUpdate!.call(
+        _rawValue.value,
+      );
+    }
   }
 
   void _moveAnimationListener() {
@@ -85,6 +96,9 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
 
   @override
   void dispose() {
+    _rawValue
+      ..removeListener(_onUpdateRaw)
+      ..dispose();
     _moveController
       ..removeStatusListener(_handleDismissStatusChanged)
       ..removeListener(_moveAnimationListener)
@@ -143,6 +157,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
     if (!_isActive || _moveController.isAnimating) return;
 
     final delta = details.primaryDelta;
+
     final oldDragExtent = _dragExtent;
     bool _(DismissiblePageDismissDirection d) => widget.direction == d;
 
@@ -173,6 +188,10 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
 
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(_updateMoveAnimation);
+    }
+
+    if (delta != null) {
+      _rawValue.value = delta;
     }
 
     if (!_moveController.isAnimating) {

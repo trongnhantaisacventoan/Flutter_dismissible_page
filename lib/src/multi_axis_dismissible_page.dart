@@ -22,6 +22,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
     required this.reverseDuration,
     required this.hitTestBehavior,
     required this.contentPadding,
+    required this.onRawDragUpdate,
     Key? key,
   }) : super(key: key);
 
@@ -30,6 +31,7 @@ class MultiAxisDismissiblePage extends StatefulWidget {
   final VoidCallback? onDragEnd;
   final VoidCallback onDismissed;
   final ValueChanged<DismissiblePageDragUpdateDetails>? onDragUpdate;
+  final ValueChanged<double>? onRawDragUpdate;
   final bool isFullScreen;
   final double minScale;
   final double minRadius;
@@ -74,11 +76,20 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
     _dragNotifier = ValueNotifier(initialDetails);
     _moveController =
         AnimationController(duration: widget.reverseDuration, vsync: this);
+    _rawValue.addListener(_onUpdateRaw);
     _moveController
       ..addStatusListener(statusListener)
       ..addListener(animationListener);
     _recognizer = widget.createRecognizer(_startDrag);
     _dragNotifier.addListener(_dragListener);
+  }
+
+  void _onUpdateRaw() {
+    if (widget.onRawDragUpdate != null) {
+      widget.onRawDragUpdate!.call(
+        _rawValue.value,
+      );
+    }
   }
 
   void animationListener() {
@@ -136,6 +147,9 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
   @override
   void update(DragUpdateDetails details) {
     if (_activePointerCount > 1) return;
+    if (details.primaryDelta != null) {
+      _rawValue.value = details.primaryDelta!;
+    }
     _updateOffset(
       (details.globalPosition - _startOffset) * widget.dragSensitivity,
     );
@@ -165,6 +179,9 @@ class _MultiAxisDismissiblePageState extends State<MultiAxisDismissiblePage>
 
   @override
   void dispose() {
+    _rawValue
+      ..removeListener(_onUpdateRaw)
+      ..dispose();
     _disposeRecognizerIfInactive();
     _moveController.dispose();
     _dragNotifier.dispose();
